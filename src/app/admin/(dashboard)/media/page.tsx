@@ -39,12 +39,13 @@ export default async function MediaPage() {
         columns={[
           { key: 'originalName', label: 'File Name' },
           { key: 'mimeType', label: 'Type' },
-          { key: 'size', label: 'Size', format: (v: unknown) => `${(v as number / 1024).toFixed(1)} KB` },
-          { key: 'createdAt', label: 'Uploaded', format: (v: unknown) => v ? new Date(v as string).toLocaleDateString('id-ID') : '-' },
+          { key: 'size', label: 'Size', formatType: 'fileSize' },
+          { key: 'createdAt', label: 'Uploaded', formatType: 'date' },
         ]}
         createHref="/admin/media/new"
         createLabel="Upload Media"
-        rowHref={(m) => `/admin/media/${(m as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/media/{id}/edit"
+        rowHrefField="id"
       />
     </div>
   )

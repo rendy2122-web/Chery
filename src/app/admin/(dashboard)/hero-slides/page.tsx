@@ -25,13 +25,8 @@ async function getHeroSlides() {
 
 async function deleteSlide(id: string) {
   'use server'
-  try {
-    await prisma.heroSlide.delete({ where: { id } })
-    revalidatePath('/admin/hero-slides')
-    return { success: true }
-  } catch (error) {
-    return { error: 'Failed to delete slide' }
-  }
+  await prisma.heroSlide.delete({ where: { id } })
+  revalidatePath('/admin/hero-slides')
 }
 
 export default async function HeroSlidesPage() {
@@ -63,32 +58,15 @@ export default async function HeroSlidesPage() {
           { key: 'type', label: 'Type' },
           { key: 'title', label: 'Title' },
           { key: 'order', label: 'Order' },
-          { key: 'duration', label: 'Duration', format: (v: unknown) => {
-              const d = v as number
-              return d ? `${d / 1000}s` : '6s'
-            }
-          },
-          { 
-            key: 'active', 
-            label: 'Status', 
-            format: (v: unknown) => v ? 'Active' : 'Inactive' 
-          },
-          { key: 'startDate', label: 'Start', format: (v: unknown) => {
-              const date = v as string | null
-              if (!date) return '-'
-              return new Date(date).toLocaleDateString('id-ID')
-            }
-          },
-          { key: 'endDate', label: 'End', format: (v: unknown) => {
-              const date = v as string | null
-              if (!date) return '-'
-              return new Date(date).toLocaleDateString('id-ID')
-            }
-          }
+          { key: 'duration', label: 'Duration', formatType: 'durationMs' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
+          { key: 'startDate', label: 'Start', formatType: 'date' },
+          { key: 'endDate', label: 'End', formatType: 'date' }
         ]}
         createHref="/admin/hero-slides/new"
         createLabel="Add Slide"
-        rowHref={(s) => `/admin/hero-slides/${(s as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/hero-slides/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search slides..."
         filterable
@@ -98,10 +76,7 @@ export default async function HeroSlidesPage() {
           { label: 'Video', value: 'VIDEO' },
           { label: 'Copy', value: 'COPY' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteSlide(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteSlide}
         deleteField="title"
       />
     </div>

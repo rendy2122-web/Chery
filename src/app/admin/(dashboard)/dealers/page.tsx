@@ -21,13 +21,8 @@ async function getDealers() {
 
 async function deleteDealer(id: string) {
   'use server'
-  try {
-    await prisma.dealer.delete({ where: { id } })
-    revalidatePath('/admin/dealers')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete dealer' }
-  }
+  await prisma.dealer.delete({ where: { id } })
+  revalidatePath('/admin/dealers')
 }
 
 export default async function DealersPage() {
@@ -57,11 +52,12 @@ export default async function DealersPage() {
           { key: 'name', label: 'Name' },
           { key: 'city', label: 'City' },
           { key: 'phone', label: 'Phone' },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/dealers/new"
         createLabel="Add Dealer"
-        rowHref={(d) => `/admin/dealers/${(d as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/dealers/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search dealers..."
         filterable
@@ -70,10 +66,7 @@ export default async function DealersPage() {
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteDealer(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteDealer}
         deleteField="name"
       />
     </div>

@@ -41,13 +41,14 @@ export default async function LeadsPage() {
         columns={[
           { key: 'name', label: 'Name' },
           { key: 'phone', label: 'Phone' },
-          { key: 'selectedModel', label: 'Model', format: (v: unknown) => v ? String(v) : '-' },
+          { key: 'selectedModel', label: 'Model', formatType: 'fallback' },
           { key: 'status', label: 'Status' },
-          { key: 'createdAt', label: 'Date', format: (v: unknown) => v ? new Date(v as string).toLocaleDateString('id-ID') : '-' },
+          { key: 'createdAt', label: 'Date', formatType: 'date' },
         ]}
         createHref="/admin/leads/new"
         createLabel="Add Lead"
-        rowHref={(l) => `/admin/leads/${(l as { id: string }).id}`}
+        rowHrefPattern="/admin/leads/{id}"
+        rowHrefField="id"
       />
     </div>
   )

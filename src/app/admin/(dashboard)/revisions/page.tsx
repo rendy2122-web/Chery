@@ -40,11 +40,11 @@ export default async function RevisionsPage() {
           { key: 'entityType', label: 'Entity Type' },
           { key: 'userName', label: 'User' },
           { key: 'action', label: 'Action' },
-          { key: 'createdAt', label: 'Date', format: (v: unknown) => v ? new Date(v as string).toLocaleString('id-ID') : '-' },
+          { key: 'createdAt', label: 'Date', formatType: 'datetime' },
         ]}
         createHref=""
         createLabel=""
-        rowHref={() => '#'}
+        rowHrefPattern="#"
       />
     </div>
   )

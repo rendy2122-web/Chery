@@ -22,13 +22,8 @@ async function getNews() {
 
 async function deleteNews(id: string) {
   'use server'
-  try {
-    await prisma.news.delete({ where: { id } })
-    revalidatePath('/admin/news')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete news' }
-  }
+  await prisma.news.delete({ where: { id } })
+  revalidatePath('/admin/news')
 }
 
 export default async function NewsPage() {
@@ -58,20 +53,13 @@ export default async function NewsPage() {
         columns={[
           { key: 'title', label: 'Title' },
           { key: 'category', label: 'Category' },
-          { key: 'status', label: 'Status', format: (v: unknown) => {
-              const s = v as string
-              return s === 'PUBLISHED' ? 'Published' : 'Draft'
-            }
-          },
-          { key: 'publishDate', label: 'Published', format: (v: unknown) => {
-              const d = v as string | null
-              return d ? new Date(d).toLocaleDateString('id-ID') : '-'
-            }
-          },
+          { key: 'status', label: 'Status', formatType: 'status' },
+          { key: 'publishDate', label: 'Published', formatType: 'date' },
         ]}
         createHref="/admin/news/new"
         createLabel="Add News"
-        rowHref={(n) => `/admin/news/${(n as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/news/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search news..."
         filterable
@@ -80,10 +68,7 @@ export default async function NewsPage() {
           { label: 'Published', value: 'PUBLISHED' },
           { label: 'Draft', value: 'DRAFT' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteNews(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteNews}
         deleteField="title"
       />
     </div>

@@ -39,11 +39,12 @@ export default async function ApprovalsPage() {
           { key: 'title', label: 'Title' },
           { key: 'category', label: 'Category' },
           { key: 'author', label: 'Author' },
-          { key: 'createdAt', label: 'Submitted', format: (v: unknown) => v ? new Date(v as string).toLocaleDateString('id-ID') : '-' },
+          { key: 'createdAt', label: 'Submitted', formatType: 'date' },
         ]}
         createHref=""
         createLabel=""
-        rowHref={(n) => `/admin/news/${(n as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/news/{id}/edit"
+        rowHrefField="id"
       />
     </div>
   )

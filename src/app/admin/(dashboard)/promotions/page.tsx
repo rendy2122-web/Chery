@@ -20,13 +20,8 @@ async function getPromotions() {
 
 async function deletePromotion(id: string) {
   'use server'
-  try {
-    await prisma.promotion.delete({ where: { id } })
-    revalidatePath('/admin/promotions')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete promotion' }
-  }
+  await prisma.promotion.delete({ where: { id } })
+  revalidatePath('/admin/promotions')
 }
 
 export default async function PromotionsPage() {
@@ -54,16 +49,13 @@ export default async function PromotionsPage() {
         data={data}
         columns={[
           { key: 'title', label: 'Title' },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
-          { key: 'createdAt', label: 'Created', format: (v: unknown) => {
-              const d = v as string
-              return d ? new Date(d).toLocaleDateString('id-ID') : '-'
-            }
-          },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
+          { key: 'createdAt', label: 'Created', formatType: 'date' },
         ]}
         createHref="/admin/promotions/new"
         createLabel="Add Promotion"
-        rowHref={(p) => `/admin/promotions/${(p as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/promotions/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search promotions..."
         filterable
@@ -72,10 +64,7 @@ export default async function PromotionsPage() {
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' },
         ]}
-        onDelete={async (item) => {
-          const result = await deletePromotion(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deletePromotion}
         deleteField="title"
       />
     </div>

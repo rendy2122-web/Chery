@@ -1,0 +1,19 @@
+version: "3.8"
+
+# Local development PostgreSQL only (app runs via `npm run dev`)
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: chery-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chery
+      POSTGRES_PASSWORD: chery_dev
+      POSTGRES_DB: chery_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+
+volumes:
+  pgdata_dev:

@@ -20,13 +20,8 @@ async function getFaqs() {
 
 async function deleteFaq(id: string) {
   'use server'
-  try {
-    await prisma.faq.delete({ where: { id } })
-    revalidatePath('/admin/faqs')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete FAQ' }
-  }
+  await prisma.faq.delete({ where: { id } })
+  revalidatePath('/admin/faqs')
 }
 
 export default async function FaqsPage() {
@@ -56,11 +51,12 @@ export default async function FaqsPage() {
           { key: 'question', label: 'Question' },
           { key: 'category', label: 'Category' },
           { key: 'order', label: 'Order' },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/faqs/new"
         createLabel="Add FAQ"
-        rowHref={(f) => `/admin/faqs/${(f as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/faqs/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search FAQs..."
         filterable
@@ -69,10 +65,7 @@ export default async function FaqsPage() {
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteFaq(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteFaq}
         deleteField="question"
       />
     </div>

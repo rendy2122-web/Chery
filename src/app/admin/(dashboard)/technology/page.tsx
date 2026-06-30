@@ -22,13 +22,8 @@ async function getTechnologies() {
 
 async function deleteTechnology(id: string) {
   'use server'
-  try {
-    await prisma.technology.delete({ where: { id } })
-    revalidatePath('/admin/technology')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete technology' }
-  }
+  await prisma.technology.delete({ where: { id } })
+  revalidatePath('/admin/technology')
 }
 
 export default async function TechnologyPage() {
@@ -58,11 +53,12 @@ export default async function TechnologyPage() {
           { key: 'title', label: 'Title' },
           { key: 'category', label: 'Category' },
           { key: 'order', label: 'Order' },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/technology/new"
         createLabel="Add Technology"
-        rowHref={(t) => `/admin/technology/${(t as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/technology/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search technology..."
         filterable
@@ -74,10 +70,7 @@ export default async function TechnologyPage() {
           { label: 'EV/BEV', value: 'EV' },
           { label: 'Smart Cabin', value: 'SMART_CABIN' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteTechnology(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteTechnology}
         deleteField="title"
       />
     </div>

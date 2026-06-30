@@ -6,10 +6,47 @@ import { Plus, Search, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import DeleteConfirmModal from './DeleteConfirmModal'
 import { useToast } from './Toast'
 
+type FormatType = 'boolean' | 'date' | 'datetime' | 'status' | 'fileSize' | 'currencyM' | 'rating' | 'durationMs' | 'fallback'
+
 interface Column {
   key: string
   label: string
-  format?: (value: unknown, row: Record<string, unknown>) => string
+  formatType?: FormatType
+}
+
+function formatCellValue(value: unknown, type: FormatType): string {
+  switch (type) {
+    case 'boolean':
+      return value ? 'Active' : 'Inactive'
+    case 'date':
+      return value ? new Date(value as string).toLocaleDateString('id-ID') : '-'
+    case 'datetime':
+      return value ? new Date(value as string).toLocaleString('id-ID') : '-'
+    case 'status': {
+      const statusMap: Record<string, string> = {
+        PUBLISHED: 'Published',
+        DRAFT: 'Draft',
+        ARCHIVED: 'Archived',
+      }
+      return statusMap[value as string] || String(value ?? '-')
+    }
+    case 'fileSize':
+      return `${(Number(value) / 1024).toFixed(1)} KB`
+    case 'currencyM': {
+      const val = Number(value)
+      return val ? `Rp ${(val / 1_000_000).toFixed(0)}M` : '-'
+    }
+    case 'rating':
+      return `${value} ★`
+    case 'durationMs': {
+      const d = Number(value)
+      return d ? `${d / 1000}s` : '6s'
+    }
+    case 'fallback':
+      return value ? String(value) : '-'
+    default:
+      return String(value ?? '-')
+  }
 }
 
 interface AdminTableProps {
@@ -18,13 +55,14 @@ interface AdminTableProps {
   columns: Column[]
   createHref: string
   createLabel: string
-  rowHref?: (item: Record<string, unknown>) => string
+  rowHrefPattern?: string   // e.g. "/admin/dealers/{id}/edit"
+  rowHrefField?: string      // field to replace in pattern, e.g. "id"
   searchable?: boolean
   searchPlaceholder?: string
   filterable?: boolean
   filterField?: string
   filterOptions?: { label: string; value: string }[]
-  onDelete?: (item: Record<string, unknown>) => Promise<void>
+  onDelete?: (id: string) => Promise<void>
   deleteField?: string // field to show in confirmation (e.g. 'title', 'name')
   pageSize?: number
 }
@@ -35,7 +73,8 @@ export default function AdminTable({
   columns,
   createHref,
   createLabel,
-  rowHref,
+  rowHrefPattern,
+  rowHrefField,
   searchable = true,
   searchPlaceholder = 'Search...',
   filterable = false,
@@ -96,7 +135,7 @@ export default function AdminTable({
     const item = deleteModal.item
     setDeletingId(item.id as string)
     try {
-      await onDelete(item)
+      await onDelete(item.id as string)
       setDeleteModal({ isOpen: false, item: null })
       addToast('success', 'Item deleted successfully')
     } catch (err) {
@@ -193,7 +232,7 @@ export default function AdminTable({
                     {col.label}
                   </th>
                 ))}
-                {(onDelete || rowHref) && (
+                {(onDelete || rowHrefPattern) && (
                   <th className="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap w-20">
                     Actions
                   </th>
@@ -209,7 +248,9 @@ export default function AdminTable({
                 </tr>
               ) : (
                 paginatedData.map((item) => {
-                  const href = rowHref ? rowHref(item) : ''
+                  const href = rowHrefPattern && rowHrefField
+                    ? rowHrefPattern.replace(`{${rowHrefField}}`, String(item[rowHrefField] ?? ''))
+                    : ''
                   const isDeleting = deletingId === item.id
                   return (
                     <tr
@@ -218,8 +259,8 @@ export default function AdminTable({
                     >
                       {columns.map((col) => (
                         <td key={col.key} className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                          {col.format
-                            ? col.format(item[col.key], item)
+                          {col.formatType
+                            ? formatCellValue(item[col.key], col.formatType)
                             : String(item[col.key] ?? '-')}
                         </td>
                       ))}

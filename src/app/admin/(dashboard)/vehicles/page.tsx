@@ -21,13 +21,8 @@ async function getVehicles() {
 
 async function deleteVehicle(id: string) {
   'use server'
-  try {
-    await prisma.vehicle.delete({ where: { id } })
-    revalidatePath('/admin/vehicles')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete vehicle' }
-  }
+  await prisma.vehicle.delete({ where: { id } })
+  revalidatePath('/admin/vehicles')
 }
 
 export default async function VehiclesPage() {
@@ -56,16 +51,13 @@ export default async function VehiclesPage() {
         columns={[
           { key: 'name', label: 'Name' },
           { key: 'category', label: 'Category' },
-          { key: 'priceFrom', label: 'Price From', format: (v: unknown) => {
-              const val = v as number
-              return val ? `Rp ${(val / 1000000).toFixed(0)}M` : '-'
-            }
-          },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+          { key: 'priceFrom', label: 'Price From', formatType: 'currencyM' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/vehicles/new"
         createLabel="Add Vehicle"
-        rowHref={(v) => `/admin/vehicles/${(v as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/vehicles/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search vehicles..."
         filterable
@@ -76,10 +68,7 @@ export default async function VehiclesPage() {
           { label: 'EV', value: 'EV' },
           { label: 'ICE', value: 'ICE' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteVehicle(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteVehicle}
         deleteField="name"
       />
     </div>

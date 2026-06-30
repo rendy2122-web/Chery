@@ -23,13 +23,8 @@ async function getTestimonials() {
 
 async function deleteTestimonial(id: string) {
   'use server'
-  try {
-    await prisma.testimonial.delete({ where: { id } })
-    revalidatePath('/admin/testimonials')
-    return { success: true }
-  } catch {
-    return { error: 'Failed to delete testimonial' }
-  }
+  await prisma.testimonial.delete({ where: { id } })
+  revalidatePath('/admin/testimonials')
 }
 
 export default async function TestimonialsPage() {
@@ -58,12 +53,13 @@ export default async function TestimonialsPage() {
         columns={[
           { key: 'customerName', label: 'Customer Name' },
           { key: 'modelOwned', label: 'Model' },
-          { key: 'rating', label: 'Rating', format: (v: unknown) => `${v} ★` },
-          { key: 'active', label: 'Status', format: (v: unknown) => v ? 'Active' : 'Inactive' },
+          { key: 'rating', label: 'Rating', formatType: 'rating' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/testimonials/new"
         createLabel="Add Testimonial"
-        rowHref={(t) => `/admin/testimonials/${(t as { id: string }).id}/edit`}
+        rowHrefPattern="/admin/testimonials/{id}/edit"
+        rowHrefField="id"
         searchable
         searchPlaceholder="Search testimonials..."
         filterable
@@ -72,10 +68,7 @@ export default async function TestimonialsPage() {
           { label: 'Active', value: 'true' },
           { label: 'Inactive', value: 'false' },
         ]}
-        onDelete={async (item) => {
-          const result = await deleteTestimonial(item.id as string)
-          if ('error' in result) throw new Error(result.error)
-        }}
+        onDelete={deleteTestimonial}
         deleteField="customerName"
       />
     </div>

@@ -23,11 +23,12 @@ export default async function FaqPage() {
         columns={[
           { key: 'question', label: 'Question' },
           { key: 'category', label: 'Category' },
-          { key: 'active', label: 'Status', format: (v: any) => v ? 'Active' : 'Inactive' },
+          { key: 'active', label: 'Status', formatType: 'boolean' },
         ]}
         createHref="/admin/faq/new"
         createLabel="Add FAQ"
-        rowHref={(v: any) => `/admin/faq/${v.id}/edit`}
+        rowHrefPattern="/admin/faq/{id}/edit"
+        rowHrefField="id"
       />
     </div>
   )

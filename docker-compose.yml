@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  app:
+    image: node:20-alpine
+    container_name: chery-app
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      # Exclude node_modules from bind mount so the host copy is used
+      - /app/node_modules/.prisma
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "
+        npm ci --production --ignore-scripts &&
+        npx prisma generate &&
+        node_modules/.bin/next start
+      "
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
