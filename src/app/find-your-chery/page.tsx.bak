@@ -1,0 +1,238 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { ArrowRight, Star, Car, CheckCircle2 } from 'lucide-react'
+import Link from 'next/link'
+import { vehicles } from '@/lib/data/vehicles'
+import { cn } from '@/lib/utils/cn'
+import VehicleCard from '@/components/sections/VehicleCard'
+import { motion, AnimatePresence } from 'framer-motion'
+
+export default function FindYourCheryPage() {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [showResult, setShowResult] = useState(false)
+
+  const questions = [
+    {
+      id: 'budget',
+      question: 'What is your budget range?',
+      options: [
+        { value: 'under-300', label: 'Under Rp 300 juta', emoji: '💰' },
+        { value: '300-500', label: 'Rp 300 - 500 juta', emoji: '💵' },
+        { value: '500-800', label: 'Rp 500 - 800 juta', emoji: '💎' },
+        { value: 'above-800', label: 'Above Rp 800 juta', emoji: '👑' },
+      ],
+    },
+    {
+      id: 'type',
+      question: 'What type of vehicle do you prefer?',
+      options: [
+        { value: 'suv', label: 'SUV - Spacious & Versatile', emoji: '🚙' },
+        { value: 'sedan', label: 'Sedan - Elegant & Comfortable', emoji: '🚗' },
+        { value: 'electric', label: 'Electric - Eco-Friendly', emoji: '⚡' },
+        { value: 'any', label: 'No Preference', emoji: '🤔' },
+      ],
+    },
+    {
+      id: 'seats',
+      question: 'How many seats do you need?',
+      options: [
+        { value: '5', label: '5 Seats', emoji: '👨‍👩‍👧‍👦' },
+        { value: '7', label: '7 Seats', emoji: '👨‍👩‍👧‍👦‍👦' },
+        { value: 'any', label: 'No Preference', emoji: '🤷' },
+      ],
+    },
+    {
+      id: 'usage',
+      question: 'What will be your primary usage?',
+      options: [
+        { value: 'city', label: 'City Commuting', emoji: '🏙️' },
+        { value: 'family', label: 'Family Trips', emoji: '🏖️' },
+        { value: 'business', label: 'Business Use', emoji: '💼' },
+        { value: 'adventure', label: 'Adventure & Travel', emoji: '🏔️' },
+      ],
+    },
+    {
+      id: 'priority',
+      question: 'What is your top priority?',
+      options: [
+        { value: 'safety', label: 'Safety & Security', emoji: '🛡️' },
+        { value: 'performance', label: 'Performance & Power', emoji: '⚡' },
+        { value: 'comfort', label: 'Comfort & Features', emoji: '✨' },
+        { value: 'value', label: 'Value for Money', emoji: '💯' },
+      ],
+    },
+  ]
+
+  const getRecommendation = () => {
+    const budget = answers.budget
+    const type = answers.type
+    const seats = answers.seats
+    const usage = answers.usage
+    const priority = answers.priority
+
+    let recommended = vehicles
+
+    if (type === 'electric') {
+      recommended = recommended.filter(v => v.category === 'ev')
+    } else if (type === 'suv') {
+      recommended = recommended.filter(v => v.category === 'suv')
+    }
+
+    if (seats === '7') {
+      recommended = recommended.filter(v => v.specs.seats >= 7)
+    }
+
+    if (budget === 'under-300') {
+      recommended = recommended.filter(v => v.price < 300000000)
+    } else if (budget === '300-500') {
+      recommended = recommended.filter(v => v.price >= 300000000 && v.price <= 500000000)
+    } else if (budget === '500-800') {
+      recommended = recommended.filter(v => v.price >= 500000000 && v.price <= 800000000)
+    }
+
+    if (recommended.length === 0) {
+      recommended = vehicles.slice(0, 2)
+    }
+
+    return recommended.slice(0, 3)
+  }
+
+  const handleAnswer = (questionId: string, value: string) => {
+    setAnswers({ ...answers, [questionId]: value })
+    
+    if (currentStep < questions.length - 1) {
+      setTimeout(() => {
+        setCurrentStep(currentStep + 1)
+      }, 300)
+    } else {
+      setTimeout(() => {
+        setShowResult(true)
+      }, 300)
+    }
+  }
+
+  const resetQuiz = () => {
+    setCurrentStep(0)
+    setAnswers({})
+    setShowResult(false)
+  }
+
+  const recommendations = getRecommendation()
+  const progress = ((currentStep + 1) / questions.length) * 100
+
+  return (
+    <main className="min-h-screen pt-20">
+      {/* Hero Section */}
+      <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="/images/find-your-chery-hero.png"
+            alt="Chery vehicles"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-chery-navy/60" />
+        </div>
+        <div className="container-custom relative z-10 text-center">
+          <div className="animate-slide-up">
+            <div className="w-20 h-20 bg-chery-red/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Star className="h-10 w-10 text-chery-red" />
+            </div>
+            <h1 className="font-heading font-bold text-4xl md:text-6xl mb-6 text-white">
+              Find Your Chery
+            </h1>
+            <p className="text-xl text-gray-200 max-w-2xl mx-auto">
+              Answer a few questions and we'll recommend the perfect Chery for your lifestyle
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Quiz Section */}
+      {!showResult ? (
+        <section className="section-padding bg-gray-50">
+          <div className="container-custom">
+            <div className="max-w-3xl mx-auto">
+              {/* Progress Bar */}
+              <div className="mb-12">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Question {currentStep + 1} of {questions.length}
+                  </span>
+                  <span className="text-sm font-semibold text-chery-red">
+                    {Math.round(progress)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-chery-red h-full rounded-full transition-all duration-500"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Question */}
+              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 animate-scale-in">
+                <h2 className="font-heading font-bold text-2xl md:text-3xl text-chery-navy mb-8 text-center">
+                  {questions[currentStep].question}
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {questions[currentStep].options.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleAnswer(questions[currentStep].id, option.value)}
+                      className={cn(
+                        'p-6 rounded-xl border-2 transition-all duration-300 text-left hover:border-chery-red hover:shadow-lg',
+                        {
+                          'border-chery-red bg-chery-red/5': answers[questions[currentStep].id] === option.value,
+                          'border-gray-200 bg-white': answers[questions[currentStep].id] !== option.value,
+                        }
+                      )}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <span className="text-3xl">{option.emoji}</span>
+                        <div>
+                          <p className="font-semibold text-chery-navy text-lg">
+                            {option.label}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* CTA Section */}
+      <section className="section-padding bg-chery-navy text-white">
+        <div className="container-custom text-center">
+          <div className="animate-slide-up">
+            <h2 className="font-heading font-bold text-3xl md:text-4xl mb-4">
+              Ready to Experience Your Recommended Chery?
+            </h2>
+            <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+              Book a test drive today and discover why Chery is the perfect choice for you
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/contact" className="btn-primary inline-flex items-center text-lg">
+                Book Test Drive
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+              <Link href="/models" className="btn-secondary bg-white/10 border-white text-white hover:bg-white hover:text-chery-navy text-lg">
+                Browse All Models
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
+}

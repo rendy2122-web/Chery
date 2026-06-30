@@ -1,0 +1,358 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("CONTENT_ADMIN")
+  dealerId  String?
+  avatar    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([dealerId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  name      String
+  role      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Vehicle {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String    @unique
+  category           String
+  priceFrom          Float
+  description        String
+  shortDescription   String?
+  exteriorImage      String
+  interiorImage      String?
+  gallery            String
+  keyFeatures        String
+  specifications     String
+  safetyFeatures     String?
+  technologyFeatures String?
+  brochureUrl        String?
+  testDriveCta       String?
+  active             Boolean   @default(true)
+  order              Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([active])
+  @@index([order])
+}
+
+model Promotion {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  imageUrl    String
+  description String
+  relatedModel String?
+  startDate   DateTime
+  endDate     DateTime
+  terms       String?
+  ctaLabel    String?
+  ctaUrl      String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([active])
+  @@index([startDate, endDate])
+}
+
+model Dealer {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  city          String
+  address       String
+  whatsapp      String
+  phone         String
+  email         String?
+  businessHours String
+  googleMapsUrl String?
+  imageUrl      String
+  services      String
+  branchPromo   String?
+  active        Boolean   @default(true)
+  order         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([city])
+  @@index([active])
+  @@index([order])
+}
+
+model News {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  category       String
+  thumbnailUrl   String
+  excerpt        String
+  contentBody    String
+  author         String
+  publishDate    DateTime?
+  seoTitle       String?
+  seoDescription String?
+  status         String     @default("DRAFT")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([status])
+  @@index([publishDate])
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([category])
+  @@index([active])
+  @@index([order])
+}
+
+model Lead {
+  id               String     @id @default(cuid())
+  name             String
+  phone            String
+  email            String?
+  selectedModel    String?
+  selectedDealerId String?
+  message          String?
+  sourcePage       String?
+  status           String     @default("NEW")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([selectedModel])
+}
+
+model Hero {
+  id         String    @id @default(cuid())
+  title      String
+  subtitle   String
+  ctaPrimary String?
+  ctaSecondary String?
+  imageUrl   String?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model HeroSlide {
+  id         String    @id @default(cuid())
+  type       String    @default("IMAGE")
+  title      String?
+  subtitle   String?
+  description String?
+  mediaUrl   String
+  ctaLabel   String?
+  ctaUrl     String?
+  order      Int       @default(0)
+  active     Boolean   @default(true)
+  startDate  DateTime?
+  endDate    DateTime?
+  duration   Int       @default(6000)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([active])
+  @@index([order])
+  @@index([startDate, endDate])
+}
+
+model Technology {
+  id               String    @id @default(cuid())
+  title            String
+  slug             String    @unique
+  category         String
+  icon             String?
+  imageUrl         String?
+  shortDescription String
+  longDescription  String?
+  order            Int       @default(0)
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([active])
+  @@index([order])
+}
+
+model Testimonial {
+  id             String   @id @default(cuid())
+  customerName   String
+  location       String?
+  modelOwned     String?
+  testimonialText String
+  rating         Int      @default(5)
+  imageUrl       String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([active])
+  @@index([rating])
+}
+
+model Ownership {
+  id                String    @id @default(cuid())
+  warrantyContent   String
+  serviceContent    String
+  aftersalesContent String
+  sparePartsContent String
+  emergencySupport  String
+  bookingServiceCta String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Financing {
+  id                  String    @id @default(cuid())
+  defaultInterestRate Float
+  tenorOptions        String
+  dpOptions           String
+  adminFeeNote        String?
+  disclaimerText      String?
+  ctaLabel            String?
+  ctaUrl              String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Revision {
+  id         String    @id @default(cuid())
+  entityType String
+  entityId   String
+  userId     String
+  userName   String
+  action     String
+  oldValue   String?
+  newValue   String?
+  createdAt  DateTime  @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  altText     String?
+  caption     String?
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+
+  @@index([uploadedBy])
+  @@index([createdAt])
+}
+
+model QuizQuestion {
+  id        String        @id @default(cuid())
+  question  String
+  order     Int           @default(0)
+  active    Boolean       @default(true)
+  answers   QuizAnswer[]
+  createdAt DateTime      @default(now())
+
+  @@index([active])
+  @@index([order])
+}
+
+model QuizAnswer {
+  id         String       @id @default(cuid())
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer     String
+  mappedModel String?
+  order      Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  @@index([questionId])
+  @@index([order])
+}
+
+model QuizResult {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  mappedModel String?
+  ctaLabel    String   @default("Book Test Drive")
+  ctaUrl      String   @default("/contact")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+}
+
+model FinalCta {
+  id              String   @id @default(cuid())
+  headline        String
+  subheadline     String
+  ctaLabel        String
+  ctaUrl          String
+  backgroundImage String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model GlobalSeo {
+  id             String   @id @default(cuid())
+  page           String   @unique
+  pageTitle      String?
+  metaDescription String?
+  canonicalUrl   String?
+  ogImage        String?
+  schemaType     String?
+  robots         String   @default("index, follow")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([page])
+}
