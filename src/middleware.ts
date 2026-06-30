@@ -61,11 +61,11 @@ function checkRateLimit(ip: string): boolean {
 // Cleanup old rate limit records periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [ip, record] of rateLimitMap.entries()) {
+  rateLimitMap.forEach((record, ip) => {
     if (now > record.resetTime) {
       rateLimitMap.delete(ip);
     }
-  }
+  });
 }, 60000);
 
 export function middleware(request: NextRequest) {
