@@ -17,6 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
   ];
 
+  // Skip dynamic DB queries during CI build — the empty DB has nothing to contribute
+  if (process.env.CI === 'true' || process.env.SKIP_DYNAMIC_SITEMAP === 'true') {
+    return staticPages;
+  }
+
   try {
     const [vehicles, news, dealers] = await Promise.all([
       prisma.vehicle.findMany({ where: { active: true }, select: { slug: true, updatedAt: true } }),
