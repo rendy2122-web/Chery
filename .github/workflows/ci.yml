@@ -10,6 +10,14 @@ on:
       - main
       - develop
 
+env:
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+  NEXT_PUBLIC_API_URL: http://localhost:3000/api
+  NEXTAUTH_SECRET: test-secret-key-for-ci-only-32-characters-long
+  NEXTAUTH_URL: http://localhost:3000
+  ADMIN_EMAIL: test@example.com
+  ADMIN_PASSWORD: testpassword123
+
 jobs:
   lint-and-typecheck:
     name: Lint & Type Check
@@ -80,10 +88,6 @@ jobs:
         run: npm test
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-          NEXTAUTH_SECRET: test-secret-key-for-ci-only
-          NEXTAUTH_URL: http://localhost:3000
-          ADMIN_EMAIL: test@example.com
-          ADMIN_PASSWORD: testpassword123
 
   build:
     name: Build & Validate
@@ -112,12 +116,6 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: "file:./dev.db"
-          NEXTAUTH_SECRET: test-secret-key-for-ci-only
-          NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
-          NEXT_PUBLIC_API_URL: http://localhost:3000/api
-          ADMIN_EMAIL: test@example.com
-          ADMIN_PASSWORD: testpassword123
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
