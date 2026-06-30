@@ -60,6 +60,12 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_API_URL: http://localhost:3000/api
+          NEXTAUTH_SECRET: test-secret-key-for-ci-only-32-characters-long
+          NEXTAUTH_URL: http://localhost:3000
+          ADMIN_EMAIL: test@example.com
+          ADMIN_PASSWORD: testpassword123
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
           SKIP_DYNAMIC_SITEMAP: "true"
 
