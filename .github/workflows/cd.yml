@@ -78,6 +78,7 @@ jobs:
             package-lock.json \
             next.config.js \
             prisma/schema.prisma \
+            prisma/migrations/ \
             docker-compose.yml
 
       - name: Upload build artifact
