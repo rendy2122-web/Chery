@@ -98,21 +98,32 @@ jobs:
         with:
           name: build-output
 
+      - name: SSH connectivity preflight
+        run: |
+          timeout 15 bash -c "cat < /dev/null > /dev/tcp/${{ vars.DEPLOY_HOST }}/${{ vars.DEPLOY_PORT || 22 }}"
+          echo "TCP reachable"
+
       - name: Upload bundle to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.DEPLOY_HOST }}
+          port: ${{ vars.DEPLOY_PORT || 22 }}
           username: ${{ vars.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: deploy.tar.gz
           target: ${{ vars.DEPLOY_PATH }}
+          timeout: 120s
+          command_timeout: 10m
 
       - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.DEPLOY_HOST }}
+          port: ${{ vars.DEPLOY_PORT || 22 }}
           username: ${{ vars.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          timeout: 120s
+          command_timeout: 10m
           script: |
             set -e
             cd ${{ vars.DEPLOY_PATH }}
