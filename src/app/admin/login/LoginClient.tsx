@@ -34,7 +34,8 @@ export default function LoginClient({ callbackUrl, initialError }: LoginClientPr
         if (res.error.includes('CredentialsSignin')) {
           setError('Email atau password salah. Silakan periksa kembali.')
         } else {
-          setError('Gagal masuk. Silakan periksa koneksi Anda.')
+          // Show the actual error code so we can diagnose the issue
+          setError(`Gagal masuk: ${res.error}. Silakan periksa koneksi Anda.`)
         }
         setIsLoading(false)
       } else {
@@ -52,9 +53,9 @@ export default function LoginClient({ callbackUrl, initialError }: LoginClientPr
       {/* Decorative Brand Header */}
       <div className="text-center mb-8">
         <div className="mb-4">
-          <img 
-            src="https://cheryidn.sgp1.cdn.digitaloceanspaces.com/prod/logo.webp" 
-            alt="Chery Logo" 
+          <img
+            src="https://cheryidn.sgp1.cdn.digitaloceanspaces.com/prod/logo.webp"
+            alt="Chery Logo"
             className="w-20 h-20 object-contain mx-auto"
           />
         </div>
