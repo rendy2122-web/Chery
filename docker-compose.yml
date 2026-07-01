@@ -16,6 +16,7 @@ services:
       - "host.docker.internal:host-gateway"
     command: >
       sh -c "
+        apt-get update -y && apt-get install -y openssl &&
         npm ci --omit=dev --ignore-scripts &&
         npx prisma generate &&
         NODE_ENV=production node_modules/.bin/next start
